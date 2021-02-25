@@ -1,0 +1,32 @@
+﻿<Window x:Class="GateWayServiceUI.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:GateWayServiceUI"
+        xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+        xmlns:prism="http://prismlibrary.com/"
+        mc:Ignorable="d"
+        Title="OPC Classic 网关" Height="450" Width="800">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="20"/>
+            <RowDefinition Height="6*"/>
+            <RowDefinition Height="20" />
+            <RowDefinition Height="6*"/>
+        </Grid.RowDefinitions>
+        <TextBlock Text="OPC Classic服务" Grid.Row="0"/>
+        <TreeView Grid.Row="1" 
+                  x:Name="SourceTree"
+                  ItemsSource="{Binding SourceTree.Sources}">
+            <TreeView.ItemTemplate>
+                <HierarchicalDataTemplate ItemsSource="{Binding Children}">
+                    <TextBlock Foreground="Black" Text="{Binding Name}"/>
+                </HierarchicalDataTemplate>
+            </TreeView.ItemTemplate>
+        </TreeView>
+        <TextBlock Text="事件列表" Grid.Row="2"/>
+        <ListView Grid.Row="3"  
+                  ItemsSource="{Binding EventList.Sources}"/>
+    </Grid>
+</Window>
