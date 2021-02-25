@@ -1,0 +1,2 @@
+# OPCSocketClient
+配合OPCClassicGateWayService使用，测试OPCClassicGateWayService
