@@ -132,7 +132,7 @@ namespace Da
           return  OpcDaServices.Any(item => { return item.Host == service.Host && item.ServiceId == serviceProgId; });
         }
        
-        public string StartMonitoringItems(string serviceProgId, List<string>  itemIds)
+        public string StartMonitoringItems(string serviceProgId, List<string>  itemIds, string strMd5)
         {
             //var service = _serviceCollection.Where(a => a.ServiceIds.Contains(serviceProgId))
             //                  .FirstOrDefault();
@@ -151,13 +151,23 @@ namespace Da
             OpcDaService _server = GetOpcDaService(serviceProgId);
 
             string groupId = Guid.NewGuid().ToString();
+            OpcDaGroup group;
+            if (_server.OpcDaGroupS.ContainsKey(strMd5) == false)
+            {
+                //OpcDaGroup group = _server.Service.AddGroup(groupId);  // maybe cost lot of time
+                group = _server.Service.AddGroup(strMd5);  // maybe cost lot of time
+                group.IsActive = true;
+                //_server.OpcDaGroupS.Add(groupId, group);
+                _server.OpcDaGroupS.Add(strMd5, group);
+            }
+            else 
+            {
+                group = _server.OpcDaGroupS[strMd5];
+            }
 
-            OpcDaGroup group = _server.Service.AddGroup(groupId);  // maybe cost lot of time
-
-            _server.OpcDaGroupS.Add(groupId, group);
 
             List<OpcDaItemDefinition> itemDefList = new List<OpcDaItemDefinition>();
-            group.IsActive = true;
+            
             itemIds.ForEach(itemId => {
 
                 var def = new OpcDaItemDefinition();
@@ -193,21 +203,21 @@ namespace Da
             _callBack = callBack;
         }
 
-        public void ReadItemsValues(string ServerID, List<string> Items, string GroupId)
+        public OpcDaItemValue[] ReadItemsValues(string ServerID, List<string> Items, string GroupId, string strMd5)
         {
             OpcDaService _server = GetOpcDaService(ServerID);
 
-            if (_server.OpcDaGroupS.ContainsKey(GroupId) == true)
+            if (_server.OpcDaGroupS.ContainsKey(strMd5) == true)
             {
-                OpcDaGroup group = _server.OpcDaGroupS[GroupId];
+                OpcDaGroup group = _server.OpcDaGroupS[strMd5];
                 OpcDaItemValue[] values = group.Read(group.Items, OpcDaDataSource.Device);
-                Console.WriteLine("ReadItemsValues " + values);
-            }
-            else
-            { 
-                
 
+                Console.WriteLine("ReadItemsValues " + values);
+
+                return values;
             }
+
+            return null;
         }
 
 

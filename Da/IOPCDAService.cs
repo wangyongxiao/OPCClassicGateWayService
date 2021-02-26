@@ -12,13 +12,13 @@ namespace Da
 
         IList<TreeNode> GetTreeNodes(string service);
 
-        string StartMonitoringItems(string serviceProgId, List<string> itemIds);
+        string StartMonitoringItems(string serviceProgId, List<string> itemIds, string strMd5);
 
         void SetItemsValueChangedCallBack(IItemsValueChangedCallBack callBack);
 
         void StopMonitoringItems(string serviceProgId, string groupId);
 
-        void ReadItemsValues(string ServerID, List<string> Items, string GroupId);
+        OpcDaItemValue[] ReadItemsValues(string ServerID, List<string> Items, string GroupId, string strMd5);
 
         void WriteValues(string serviceProgId, string groupId, Dictionary<string, object> itemValuePairs);
     }

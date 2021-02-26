@@ -103,6 +103,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Protocol\ReadItemsRsp.cs" />
     <Compile Include="Protocol\Command.cs" />
     <Compile Include="Model\GroupEntity.cs" />
     <Compile Include="Model\Header.cs" />
