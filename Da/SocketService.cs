@@ -382,12 +382,13 @@ namespace Da
                         case (int)Command.Write_Nodes_Values_Req:
                             {
                                 WriteNodesValuesReq req = JsonConvert.DeserializeObject<WriteNodesValuesReq>(requestInfo.Body);
-                                _iOpcDa.WriteValues(req.ServiceId, req.Id, req.itemValuePairs);
+                                _iOpcDa.WriteValues(req.ServiceId, req.strMd5, req.itemValuePairs);
+
                                 if (_debugDataCallBack != null)
                                 {
-
                                     _debugDataCallBack.DoEventLogCallBack(requestInfo.Body);
                                 }
+
                                 byte[] bufferList = StructUtility.Package(new Header()
                                 {
                                     Id = int.Parse(requestInfo.Key) + 1,
@@ -395,6 +396,7 @@ namespace Da
                                     ErrorCode = 0,
                                     ContentSize = 0
                                 }, string.Empty);
+
                                 session.Send(bufferList, 0, bufferList.Length);
                             }
                             break;

@@ -221,29 +221,53 @@ namespace Da
         }
 
 
-        public void WriteValues(string serviceProgId, string groupId, Dictionary<string,object> itemValuePairs) {
-            var service = _serviceCollection.Where(a => a.ServiceIds.Contains(serviceProgId))
-                              .FirstOrDefault();
-            OpcDaServer daService = null;
-            if (CheckServiceExisted(service, serviceProgId))
-            {
-                daService = OpcDaServices.Find(item => { return item.Host == service.Host && item.ServiceId == serviceProgId; })
-                                      .Service;
-                if (_daGroupKeyPairs.ContainsKey(groupId)){
-                    OpcDaGroup group = _daGroupKeyPairs[groupId];
-                    var keyList = itemValuePairs.Keys.ToList();
-                    List<OpcDaItem> itemList = new List<OpcDaItem>();
-                    keyList.ForEach(ids => {
-                        var daItem = group.Items
-                                          .Where(a => a.ItemId == ids)
-                                          .FirstOrDefault();
-                        itemList.Add(daItem);
-                    });
+        public void WriteValues(string ServerID, string groupId, Dictionary<string,object> itemValuePairs) {
 
-                    group.Write(itemList, itemValuePairs.Values.ToArray());
-                }
-               
+            OpcDaService _server = GetOpcDaService(ServerID);
+            if (_server.OpcDaGroupS.ContainsKey(groupId) == true)
+            {
+                OpcDaGroup group = _server.OpcDaGroupS[groupId];
+
+                //OpcDaItemValue[] values = group.Read(group.Items, OpcDaDataSource.Device);
+                //Console.WriteLine("ReadItemsValues " + values);
+
+                var keyList = itemValuePairs.Keys.ToList();
+                List<OpcDaItem> itemList = new List<OpcDaItem>();
+                keyList.ForEach(ids => {
+                    var daItem = group.Items
+                                      .Where(a => a.ItemId == ids)
+                                      .FirstOrDefault();
+                    itemList.Add(daItem);
+                });
+
+                object[] dd = itemValuePairs.Values.ToArray();
+                HRESULT[] res = group.Write(itemList, dd);
+
+                Console.WriteLine("Write HRESULT " + res);
             }
+
+            //var service = _serviceCollection.Where(a => a.ServiceIds.Contains(serviceProgId))
+            //                  .FirstOrDefault();
+            //OpcDaServer daService = null;
+            //if (CheckServiceExisted(service, serviceProgId))
+            //{
+            //    daService = OpcDaServices.Find(item => { return item.Host == service.Host && item.ServiceId == serviceProgId; })
+            //                          .Service;
+            //    if (_daGroupKeyPairs.ContainsKey(groupId)){
+            //        OpcDaGroup group = _daGroupKeyPairs[groupId];
+            //        var keyList = itemValuePairs.Keys.ToList();
+            //        List<OpcDaItem> itemList = new List<OpcDaItem>();
+            //        keyList.ForEach(ids => {
+            //            var daItem = group.Items
+            //                              .Where(a => a.ItemId == ids)
+            //                              .FirstOrDefault();
+            //            itemList.Add(daItem);
+            //        });
+
+            //        group.Write(itemList, itemValuePairs.Values.ToArray());
+            //    }
+               
+            //}
         }
 
         private void MonitorValuesChanged(object sender, OpcDaItemValuesChangedEventArgs e)
