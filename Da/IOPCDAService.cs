@@ -18,7 +18,7 @@ namespace Da
 
         void StopMonitoringItems(string serviceProgId, string groupId);
 
-        OpcDaItemValue[] ReadItemsValues(string ServerID, List<string> Items, string GroupId, string strMd5);
+        List<Item> ReadItemsValues(string ServerID, List<string> Items, string GroupId, string strMd5);
 
         void WriteValues(string serviceProgId, string groupId, Dictionary<string, object> itemValuePairs);
     }

@@ -54,6 +54,11 @@ namespace Da
             }
         }
 
+        public void ConnectionStateChanged (object sender, OpcDaServerConnectionStateChangedEventArgs e)
+        {
+            Console.WriteLine($"---ConnectionStateChanged---IsConnected ${e.IsConnected}, ${sender}");
+        }
+
         public OpcDaService GetOpcDaService(string serviceProgId)
         {
             var service = _serviceCollection.Where(a => a.ServiceIds.Contains(serviceProgId))
@@ -79,6 +84,8 @@ namespace Da
             {
                 try
                 {
+                    Service.Service.ConnectionStateChanged += new EventHandler<OpcDaServerConnectionStateChangedEventArgs>(ConnectionStateChanged);
+
                     Service.Service.Connect();
                 }
                 catch (Exception e)
@@ -159,26 +166,26 @@ namespace Da
                 group.IsActive = true;
                 //_server.OpcDaGroupS.Add(groupId, group);
                 _server.OpcDaGroupS.Add(strMd5, group);
+
+                List<OpcDaItemDefinition> itemDefList = new List<OpcDaItemDefinition>();
+
+                itemIds.ForEach(itemId => {
+
+                    var def = new OpcDaItemDefinition();
+                    def.ItemId = itemId;
+                    def.IsActive = true;
+                    itemDefList.Add(def);
+                });
+                OpcDaItemResult[] opcDaItemResults = group.AddItems(itemDefList);
+                _daGroupKeyPairs.Add(groupId, group);
+                group.UpdateRate = TimeSpan.FromMilliseconds(1000);//100毫秒触发一次
+                group.ValuesChanged += MonitorValuesChanged;
             }
             else 
             {
                 group = _server.OpcDaGroupS[strMd5];
             }
 
-
-            List<OpcDaItemDefinition> itemDefList = new List<OpcDaItemDefinition>();
-            
-            itemIds.ForEach(itemId => {
-
-                var def = new OpcDaItemDefinition();
-                def.ItemId = itemId;
-                def.IsActive = true;
-                itemDefList.Add(def);
-            });
-            OpcDaItemResult[] opcDaItemResults = group.AddItems(itemDefList);
-            _daGroupKeyPairs.Add(groupId, group);
-            group.UpdateRate = TimeSpan.FromMilliseconds(1000);//100毫秒触发一次
-            group.ValuesChanged += MonitorValuesChanged;
             return groupId;
         }
 
@@ -203,18 +210,39 @@ namespace Da
             _callBack = callBack;
         }
 
-        public OpcDaItemValue[] ReadItemsValues(string ServerID, List<string> Items, string GroupId, string strMd5)
+        public List<Item> ReadItemsValues(string ServerID, List<string> Items, string GroupId, string strMd5)
         {
             OpcDaService _server = GetOpcDaService(ServerID);
 
             if (_server.OpcDaGroupS.ContainsKey(strMd5) == true)
             {
                 OpcDaGroup group = _server.OpcDaGroupS[strMd5];
-                OpcDaItemValue[] values = group.Read(group.Items, OpcDaDataSource.Device);
+                OpcDaItemValue[] values = group.Read(group.Items, OpcDaDataSource.Cache);
 
-                Console.WriteLine("ReadItemsValues " + values);
+                if (values.Length != group.Items.Count)
+                {
+                    Console.WriteLine($"values.Length(${values.Length}) != group.Items.Count(${group.Items.Count}) ");
+                    return null;
+                }
 
-                return values;
+                //for (int i = 0; i < values.Length; ++i)
+                //{
+                //    values[i].Item.ItemId = group.Items[i].ItemId;
+                //}
+
+                List<Item> itemValues = new List<Item>();
+                for (int i = 0; i < values.Length; ++i)
+                {
+                    //values[i].Item.ItemId = group.Items[i].ItemId;
+
+                    Item it = new Item();
+                    it.ItemId = group.Items[i].ItemId;
+                    it.Data = values[i].Value;
+                    itemValues.Add(it);
+                }
+
+
+                return itemValues;
             }
 
             return null;

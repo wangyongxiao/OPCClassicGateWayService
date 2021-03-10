@@ -33,6 +33,9 @@ namespace Da
         private List<TreeNode> _treeNodeCaches = new List<TreeNode>();
         private long  _exchanging = 0;
         private Dictionary<string, AppSession> _sessionDic = new Dictionary<string, AppSession>();
+
+        //private Dictionary<string, AppSession> _sessionDic = new Dictionary<string, AppSession>();
+        private Dictionary<string, string> _WhiteList=null;
         public SocketService() {
 
             _iOpcDa.SetItemsValueChangedCallBack(this);
@@ -53,9 +56,26 @@ namespace Da
             IniData data = fileIniDataParser.ReadFile(_iniFilePath);
             SectionDataCollection dataCollection = data.Sections;
             if (!dataCollection.ContainsSection("scan")){
-                _debugDataCallBack.DoEventLogCallBack(debugInfo("Section不存在！"));
+                _debugDataCallBack.DoEventLogCallBack(debugInfo("scan Section不存在！"));
                 return false;
             }
+
+            SectionData sectionData = dataCollection.GetSectionData("scan");
+            if (sectionData==null)
+            {
+                _debugDataCallBack.DoEventLogCallBack(debugInfo("whitelist Section不存在！"));
+            }
+            else 
+            {
+                if (sectionData.Keys.ContainsKey("whitelist")==true)
+                {
+                    string whitelist = sectionData.Keys["whitelist"];
+
+                    string[] recvArr = whitelist.Split('|');
+                    _WhiteList = recvArr.ToDictionary(t => t);
+                }
+            }
+
             _debugDataCallBack.DoEventLogCallBack(debugInfo("cfg.ini文件校验通过！"));
             return true;
         }
@@ -83,7 +103,6 @@ namespace Da
                             }
                         }
                         keyValuePairs.Add("ipAddrList", IpAddrList.Except(InvalidList).ToList()); 
-
                     }
                     else if (keyItem.KeyName.Equals("interval")){
                         if (!int.TryParse(keyItem.Value, out _interval)){
@@ -133,10 +152,31 @@ namespace Da
                     }
                     List<TreeNode> childNodes = new List<TreeNode>();
                     foreach (var opcItem in opcDaList){
-                        //if ("SunFull.X2OPC.1" == opcItem)
-                        //{
+                        if (_WhiteList != null && _WhiteList.Count != 0)
+                        {
+                            if (_WhiteList.ContainsKey(opcItem)==true)
+                            {
+                                //白名单里有该条目，添加
+                                _debugDataCallBack.DoEventLogCallBack(debugInfo(string.Format("扫描成功 地址：{0} OPCClassic {1} 添加", usefulItem.ToString(), opcItem)));
+                                childNodes.Add(new TreeNode() { Name = opcItem });
+                            }
+                            else 
+                            {
+                                //白名单里没有该条目，不添加
+                                _debugDataCallBack.DoEventLogCallBack(debugInfo(string.Format("扫描成功 地址：{0} OPCClassic {1} 不添加", usefulItem.ToString(), opcItem)));
+                            }
+                        }
+                        else 
+                        {
+                            //没有白名单，全添加
                             _debugDataCallBack.DoEventLogCallBack(debugInfo(string.Format("扫描成功 地址：{0} OPCClassic {1} 添加", usefulItem.ToString(), opcItem)));
                             childNodes.Add(new TreeNode() { Name = opcItem });
+                        }
+
+                        //if ("NETxKNX.OPC.Server.3.5" == opcItem)
+                        //{
+                        //    _debugDataCallBack.DoEventLogCallBack(debugInfo(string.Format("扫描成功 地址：{0} OPCClassic {1} 添加", usefulItem.ToString(), opcItem)));
+                        //    childNodes.Add(new TreeNode() { Name = opcItem });
                         //}
                         //else 
                         //{
@@ -345,7 +385,7 @@ namespace Da
                             {
                                 ReadItemsReq req = JsonConvert.DeserializeObject<ReadItemsReq>(requestInfo.Body);
 
-                                OpcDaItemValue[] values = _iOpcDa.ReadItemsValues(req.ServiceId, req.Items, req.GroupId, req.strMd5);
+                                List<Item> values = _iOpcDa.ReadItemsValues(req.ServiceId, req.Items, req.GroupId, req.strMd5);
 
                                 foreach (var item in values)
                                 {
@@ -358,16 +398,16 @@ namespace Da
                                     _debugDataCallBack.DoEventLogCallBack(values.ToString());
                                 }
 
-                                List<Item> itemValues = new List<Item>();
-                                foreach(var v in values)
-                                {
-                                    Item i = new Item();
-                                    i.ItemId = v.Item.ItemId;
-                                    i.Data = v.Value;
-                                    itemValues.Add(i);
-                                }
+                                //List<Item> itemValues = new List<Item>();
+                                //foreach(var v in values)
+                                //{
+                                //    Item i = new Item();
+                                //    i.ItemId = v.Item.ItemId;
+                                //    i.Data = v.Value;
+                                //    itemValues.Add(i);
+                                //}
 
-                                ReadItemsRsp rsp = new ReadItemsRsp() { ServiceId = req.ServiceId, GroupId = req.GroupId, ItemValues = itemValues, strMd5 = req.strMd5 };
+                                ReadItemsRsp rsp = new ReadItemsRsp() { ServiceId = req.ServiceId, GroupId = req.GroupId, ItemValues = values, strMd5 = req.strMd5 };
                                 string json = JsonConvert.SerializeObject(rsp);
                                 byte[] bufferList = StructUtility.Package(new Header()
                                 {
@@ -403,8 +443,8 @@ namespace Da
                     }
                 }
                 catch (Exception e)
-                { 
-                
+                {
+                    Console.WriteLine("-------------"+e);
                 }
 
                 Interlocked.Decrement(ref _exchanging);
