@@ -300,11 +300,11 @@ namespace Da
 
         private void MonitorValuesChanged(object sender, OpcDaItemValuesChangedEventArgs e)
         {
-            if (_callBack != null)
-            {
-                var opcGroup = sender as OpcDaGroup;
-                _callBack.ValueChangedCallBack(opcGroup.Name, e.Values);
-            }
+            //if (_callBack != null)
+            //{
+            //    var opcGroup = sender as OpcDaGroup;
+            //    _callBack.ValueChangedCallBack(opcGroup.Name, e.Values);
+            //}
         }
 
     }

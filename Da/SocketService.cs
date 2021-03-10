@@ -245,8 +245,9 @@ namespace Da
         public void SetupCallBack(DebugDataCallBack debugDataCallBack)
         {
             _debugDataCallBack = debugDataCallBack;
-            _scanTimer.Interval = 3000;//每3秒更新一次 这里只是假设3秒可以完全执行扫描点位 实际情况不一定如此 
-            _scanTimer.Elapsed += (o,e) => {
+            //_scanTimer.Interval = 3000;//每3秒更新一次 这里只是假设3秒可以完全执行扫描点位 实际情况不一定如此 
+            //_scanTimer.Elapsed += (o,e) => 
+            {
                 if (Interlocked.CompareExchange(ref _exchanging, 1, 0) == 0)
                 {
                     if (CheckFileExist())
@@ -272,7 +273,8 @@ namespace Da
                 }
                 
             };
-            _scanTimer.Start();
+            
+            //_scanTimer.Start();
         }
 
         string debugInfo(string info) {
