@@ -133,15 +133,15 @@ namespace Da
                     }
                     List<TreeNode> childNodes = new List<TreeNode>();
                     foreach (var opcItem in opcDaList){
-                        if ("SunFull.X2OPC.1" == opcItem)
-                        {
+                        //if ("SunFull.X2OPC.1" == opcItem)
+                        //{
                             _debugDataCallBack.DoEventLogCallBack(debugInfo(string.Format("扫描成功 地址：{0} OPCClassic {1} 添加", usefulItem.ToString(), opcItem)));
                             childNodes.Add(new TreeNode() { Name = opcItem });
-                        }
-                        else 
-                        {
-                            _debugDataCallBack.DoEventLogCallBack(debugInfo(string.Format("扫描成功 地址：{0} OPCClassic {1} 不添加", usefulItem.ToString(), opcItem)));
-                        }
+                        //}
+                        //else 
+                        //{
+                        //    _debugDataCallBack.DoEventLogCallBack(debugInfo(string.Format("扫描成功 地址：{0} OPCClassic {1} 不添加", usefulItem.ToString(), opcItem)));
+                        //}
                     }
                     node.Children.AddRange(childNodes);
                     opcDaServerList.Add(node);
