@@ -1,11 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28307.1321
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31019.35
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GateWayServiceUI", "GateWayServiceUI\GateWayServiceUI.csproj", "{648397EF-BF51-4DEB-AB56-F4083787B6BF}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Da", "Da\Da.csproj", "{7B11BB31-8465-4CF2-B39B-097D5AF44213}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpcGuard", "OpcGuard\OpcGuard.csproj", "{ED5ACDDE-76CC-4896-A74F-CDA6DE5FBBFA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -31,6 +33,14 @@ Global
 		{7B11BB31-8465-4CF2-B39B-097D5AF44213}.Release|Any CPU.Build.0 = Release|Any CPU
 		{7B11BB31-8465-4CF2-B39B-097D5AF44213}.Release|x86.ActiveCfg = Release|x86
 		{7B11BB31-8465-4CF2-B39B-097D5AF44213}.Release|x86.Build.0 = Release|x86
+		{ED5ACDDE-76CC-4896-A74F-CDA6DE5FBBFA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ED5ACDDE-76CC-4896-A74F-CDA6DE5FBBFA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ED5ACDDE-76CC-4896-A74F-CDA6DE5FBBFA}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{ED5ACDDE-76CC-4896-A74F-CDA6DE5FBBFA}.Debug|x86.Build.0 = Debug|Any CPU
+		{ED5ACDDE-76CC-4896-A74F-CDA6DE5FBBFA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ED5ACDDE-76CC-4896-A74F-CDA6DE5FBBFA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ED5ACDDE-76CC-4896-A74F-CDA6DE5FBBFA}.Release|x86.ActiveCfg = Release|Any CPU
+		{ED5ACDDE-76CC-4896-A74F-CDA6DE5FBBFA}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

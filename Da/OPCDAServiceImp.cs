@@ -64,6 +64,11 @@ namespace Da
             var service = _serviceCollection.Where(a => a.ServiceIds.Contains(serviceProgId))
                       .FirstOrDefault();
 
+            if (service==null)
+            {
+                return null;
+            }
+
             OpcDaService Service = null;
             if (CheckServiceExisted(service, serviceProgId))
             {
@@ -156,6 +161,10 @@ namespace Da
             //}
 
             OpcDaService _server = GetOpcDaService(serviceProgId);
+            if (_server==null)
+            {
+                return null;
+            }
 
             string groupId = Guid.NewGuid().ToString();
             OpcDaGroup group;
@@ -213,6 +222,10 @@ namespace Da
         public List<Item> ReadItemsValues(string ServerID, List<string> Items, string GroupId, string strMd5)
         {
             OpcDaService _server = GetOpcDaService(ServerID);
+            if (_server == null)
+            {
+                return null;
+            }
 
             if (_server.OpcDaGroupS.ContainsKey(strMd5) == true)
             {
@@ -252,6 +265,11 @@ namespace Da
         public void WriteValues(string ServerID, string groupId, Dictionary<string,object> itemValuePairs) {
 
             OpcDaService _server = GetOpcDaService(ServerID);
+            if (_server == null)
+            {
+                return;
+            }
+
             if (_server.OpcDaGroupS.ContainsKey(groupId) == true)
             {
                 OpcDaGroup group = _server.OpcDaGroupS[groupId];

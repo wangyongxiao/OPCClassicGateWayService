@@ -331,29 +331,49 @@ namespace Da
                         case (int)Command.Start_Monitor_Nodes_Req:
                             {
                                 StartMonitoringItemsReq req = JsonConvert.DeserializeObject<StartMonitoringItemsReq>(requestInfo.Body);
+
                                 string groupId = _iOpcDa.StartMonitoringItems(req.ServiceId, req.Items, req.strMd5);
-                                if (_debugDataCallBack != null)
+
+                                if (groupId == null)
                                 {
-                                    TreeNode node = new TreeNode();
-                                    node.Name = groupId;
-                                    foreach (var item in req.Items)
+                                    StartMonitoringItemsRsp rsp = new StartMonitoringItemsRsp() { ServiceId = req.ServiceId, GroupId = groupId };
+                                    string json = JsonConvert.SerializeObject(rsp);
+                                    byte[] bufferList = StructUtility.Package(new Header()
                                     {
-                                        node.Children.Add(new TreeNode() { Name = item });
-                                    }
-                                    List<TreeNode> treeNodes = new List<TreeNode>();
-                                    treeNodes.Add(node);
-                                    _debugDataCallBack.DoTreeViewCallBack(MonitorItemType.Remove, treeNodes);
+                                        Id = int.Parse(requestInfo.Key) + 1,
+                                        Cmd = (int)Command.Start_Monitor_Nodes_Rsp,
+                                        ErrorCode = -1,
+                                        ContentSize = json.Length
+                                    }, json);
+                                    session.Send(bufferList, 0, bufferList.Length);
                                 }
-                                StartMonitoringItemsRsp rsp = new StartMonitoringItemsRsp() { ServiceId = req.ServiceId, GroupId = groupId };
-                                string json = JsonConvert.SerializeObject(rsp);
-                                byte[] bufferList = StructUtility.Package(new Header()
+                                else 
                                 {
-                                    Id = int.Parse(requestInfo.Key) + 1,
-                                    Cmd = (int)Command.Start_Monitor_Nodes_Rsp,
-                                    ErrorCode = 0,
-                                    ContentSize = json.Length
-                                }, json);
-                                session.Send(bufferList, 0, bufferList.Length);
+                                    if (_debugDataCallBack != null)
+                                    {
+                                        TreeNode node = new TreeNode();
+                                        node.Name = groupId;
+                                        foreach (var item in req.Items)
+                                        {
+                                            node.Children.Add(new TreeNode() { Name = item });
+                                        }
+                                        List<TreeNode> treeNodes = new List<TreeNode>();
+                                        treeNodes.Add(node);
+                                        _debugDataCallBack.DoTreeViewCallBack(MonitorItemType.Remove, treeNodes);
+                                    }
+
+                                    StartMonitoringItemsRsp rsp = new StartMonitoringItemsRsp() { ServiceId = req.ServiceId, GroupId = groupId };
+                                    string json = JsonConvert.SerializeObject(rsp);
+                                    byte[] bufferList = StructUtility.Package(new Header()
+                                    {
+                                        Id = int.Parse(requestInfo.Key) + 1,
+                                        Cmd = (int)Command.Start_Monitor_Nodes_Rsp,
+                                        ErrorCode = 0,
+                                        ContentSize = json.Length
+                                    }, json);
+                                    session.Send(bufferList, 0, bufferList.Length);
+                                }
+
                                 //_sessionDic[groupId] = session;
                             }
                             break;
@@ -388,37 +408,37 @@ namespace Da
                                 ReadItemsReq req = JsonConvert.DeserializeObject<ReadItemsReq>(requestInfo.Body);
 
                                 List<Item> values = _iOpcDa.ReadItemsValues(req.ServiceId, req.Items, req.GroupId, req.strMd5);
-
-                                foreach (var item in values)
+                                if (values != null)
                                 {
-                                    //item.Value;
-                                    //item.Item.ItemId;
+                                    if (_debugDataCallBack != null)
+                                    {
+                                        _debugDataCallBack.DoEventLogCallBack(values.ToString());
+                                    }
+
+                                    ReadItemsRsp rsp = new ReadItemsRsp() { ServiceId = req.ServiceId, GroupId = req.GroupId, ItemValues = values, strMd5 = req.strMd5 };
+                                    string json = JsonConvert.SerializeObject(rsp);
+                                    byte[] bufferList = StructUtility.Package(new Header()
+                                    {
+                                        Id = int.Parse(requestInfo.Key) + 1,
+                                        Cmd = (int)Command.Read_Nodes_Values_Rsp,
+                                        ErrorCode = 0,
+                                        ContentSize = json.Length
+                                    }, json);
+                                    session.Send(bufferList, 0, bufferList.Length);
                                 }
-
-                                if (_debugDataCallBack != null)
+                                else 
                                 {
-                                    _debugDataCallBack.DoEventLogCallBack(values.ToString());
+                                    ReadItemsRsp rsp = new ReadItemsRsp() { ServiceId = req.ServiceId, GroupId = req.GroupId, ItemValues = values, strMd5 = req.strMd5 };
+                                    string json = JsonConvert.SerializeObject(rsp);
+                                    byte[] bufferList = StructUtility.Package(new Header()
+                                    {
+                                        Id = int.Parse(requestInfo.Key) + 1,
+                                        Cmd = (int)Command.Read_Nodes_Values_Rsp,
+                                        ErrorCode = -1,
+                                        ContentSize = json.Length
+                                    }, json);
+                                    session.Send(bufferList, 0, bufferList.Length);
                                 }
-
-                                //List<Item> itemValues = new List<Item>();
-                                //foreach(var v in values)
-                                //{
-                                //    Item i = new Item();
-                                //    i.ItemId = v.Item.ItemId;
-                                //    i.Data = v.Value;
-                                //    itemValues.Add(i);
-                                //}
-
-                                ReadItemsRsp rsp = new ReadItemsRsp() { ServiceId = req.ServiceId, GroupId = req.GroupId, ItemValues = values, strMd5 = req.strMd5 };
-                                string json = JsonConvert.SerializeObject(rsp);
-                                byte[] bufferList = StructUtility.Package(new Header()
-                                {
-                                    Id = int.Parse(requestInfo.Key) + 1,
-                                    Cmd = (int)Command.Read_Nodes_Values_Rsp,
-                                    ErrorCode = 0,
-                                    ContentSize = json.Length
-                                }, json);
-                                session.Send(bufferList, 0, bufferList.Length);
                             }
                             break;
                         case (int)Command.Write_Nodes_Values_Req:
@@ -446,7 +466,7 @@ namespace Da
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine("-------------"+e);
+                    Console.WriteLine($"{session.RemoteEndPoint.Address.ToString()}-------------"+e);
                 }
 
                 Interlocked.Decrement(ref _exchanging);
