@@ -20,7 +20,8 @@ namespace GateWayServiceUI
             MainWindow window = new MainWindow();
             window.DataContext = daViewModel;
             window.Show();
-            
+
+            daViewModel.Start();
         }
     }
 }

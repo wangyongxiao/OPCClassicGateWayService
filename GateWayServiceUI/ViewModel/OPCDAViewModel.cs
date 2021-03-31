@@ -33,10 +33,15 @@ namespace GateWayServiceUI.ViewModel
 
             _sourceTree = new SourceTreeViewModel();
             _eventList = new EventLogListViewModel();
+            //_server.SetupCallBack(this);
+            //_server.Start();
+        }
+
+        public void Start()
+        {
             _server.SetupCallBack(this);
             _server.Start();
         }
-
         public void DoTreeViewCallBack(MonitorItemType itemType, IList<TreeNode> trees)
         {
             if (itemType == MonitorItemType.Initial)

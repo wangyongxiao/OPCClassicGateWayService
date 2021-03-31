@@ -57,6 +57,11 @@ namespace Da
         public void ConnectionStateChanged (object sender, OpcDaServerConnectionStateChangedEventArgs e)
         {
             Console.WriteLine($"---ConnectionStateChanged---IsConnected ${e.IsConnected}, ${sender}");
+            if (e.IsConnected == false)
+            {
+                Thread.Sleep(1000);
+                Environment.Exit(0);
+            }
         }
 
         public OpcDaService GetOpcDaService(string serviceProgId)
@@ -126,6 +131,7 @@ namespace Da
         private void BrowseChildren(IOpcDaBrowser browser, IList<TreeNode> Items, string itemId = null, int indent = 0)
         {
             OpcDaBrowseElement[] elements = browser.GetElements(itemId);
+
             foreach (OpcDaBrowseElement element in elements)
             {
                 if (!(element.ItemId.IndexOf('$') == 0)) {
@@ -183,6 +189,7 @@ namespace Da
                     var def = new OpcDaItemDefinition();
                     def.ItemId = itemId;
                     def.IsActive = true;
+                    //def.RequestedDataType = ;
                     itemDefList.Add(def);
                 });
                 OpcDaItemResult[] opcDaItemResults = group.AddItems(itemDefList);
@@ -251,6 +258,9 @@ namespace Da
                     Item it = new Item();
                     it.ItemId = group.Items[i].ItemId;
                     it.Data = values[i].Value;
+
+                    Console.WriteLine($"values[{i}].Value.GetType() ${values[i].Value.GetType()} ");
+
                     itemValues.Add(it);
                 }
 

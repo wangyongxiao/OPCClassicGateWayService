@@ -467,6 +467,7 @@ namespace Da
                 catch (Exception e)
                 {
                     Console.WriteLine($"{session.RemoteEndPoint.Address.ToString()}-------------"+e);
+                    session.Close();
                 }
 
                 Interlocked.Decrement(ref _exchanging);
